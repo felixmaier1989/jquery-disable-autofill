@@ -1,16 +1,24 @@
 (function($) {
 
-	$.fn.disableAutoFill = function() {
+	$.fn.disableAutoFill = function(options) {
 
 		"use strict";
 
+		var defaults = {
+			onSubmit: false
+		};
+
 		var self = {
+
+			settings: defaults,
+			submitHandlerSet: false,
 
 			/**
 			 * Disable autofill for one input
 			 * @param {Object} $input jQuery element
 			 */
-			disableAutoFill: function($input) {
+			disableAutoFill: function($input, options) {
+				self.settings = $.extend({}, defaults, options || {});
 				if (self.isBrowser('safari')) {
 					self.alterLabel($input);
 					self.alterName($input);
@@ -74,9 +82,13 @@
 			 * @param {Object} $input jQuery element
 			 */
 			setFormSubmitHandler: function ($input) {
+				if (self.submitHandlerSet) {
+					return;
+				}
+				self.submitHandlerSet = true;
 				var $form = $input.closest('form');
 				if ($form.length > 0) {
-					$form.submit(function() {
+					$form.submit(function(event) {
 						var id = $input.attr('data-original-id');
 						if (id) {
 							$input.attr('id', id);
@@ -85,6 +97,10 @@
 						if (name) {
 							$input.attr('name', name);
 						}
+						if (typeof self.settings.onSubmit === 'function') {
+							var callback = self.settings.onSubmit;
+							return callback(event);
+						}
 					});
 				}
 			},
@@ -92,6 +108,7 @@
 			/**
 			 * Make sure Safari wont detect the word "name" in the label
 			 * otherwise Safari will enable autofill
+			 * This injects <span> tags within the label
 			 * @param {Object} $input jQuery element
 			 */
 			alterLabel: function ($input) {
@@ -183,7 +200,7 @@
 
 		};
 
-		self.disableAutoFill(this);
+		self.disableAutoFill(this, options);
 
 		return this;
 	};
