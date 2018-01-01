@@ -134,7 +134,7 @@
 					return $label;
 				}
 				var $parentElem = $input.parent();
-				var $parentTagName = parentElem.get(0).tagName.toLowerCase();
+				var $parentTagName = $parentElem.get(0).tagName.toLowerCase();
 
 				if ($parentTagName == "label") {
 					return $parentElem;
